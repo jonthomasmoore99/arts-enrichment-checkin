@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtSparks - Afternoon Arts Enrichment Check-In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        art: {
+                            50: '#fdf4ff',
+                            100: '#fae8ff',
+                            500: '#d946ef',
+                            600: '#c026d3',
+                            700: '#a21caf',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .paint-blob {
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes pulse-light {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-light 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 flex flex-col antialiased selection:bg-fuchsia-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Brand & Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-fuchsia-600 via-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-fuchsia-200">
+                        <i data-lucide="palette" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">ArtSparks</h1>
+                            <span class="bg-fuchsia-100 text-fuchsia-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-fuchsia-200">Enrichment</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium hidden sm:block">Afternoon Studio Attendance & Safety Portal</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Tabs -->
+                <nav class="hidden md:flex items-center space-x-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white text-slate-900 shadow-sm">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-fuchsia-600"></i>
+                        <span>Live Board</span>
+                    </button>
+                    <button onclick="switchTab('roster')" id="nav-roster" class="nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Students Roster</span>
+                    </button>
+                    <button onclick="switchTab('studios')" id="nav-studios" class="nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900">
+                        <i data-lucide="brush" class="w-4 h-4"></i>
+                        <span>Studio Stations</span>
+                    </button>
+                    <button onclick="switchTab('history')" id="nav-history" class="nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span>Logs & Reports</span>
+                    </button>
+                </nav>
+
+                <!-- Quick Action Header Controls -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <button onclick="openKioskMode()" class="bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm font-bold px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-xl shadow-md shadow-violet-200 transition flex items-center space-x-2 active:scale-95">
+                        <i data-lucide="tablet" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Parent Kiosk</span>
+                    </button>
+                    <button onclick="openAddModal()" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-xs sm:text-sm font-bold px-3.5 py-2.5 sm:px-4 sm:py-2.5 rounded-xl shadow-md shadow-fuchsia-200 transition flex items-center space-x-2 active:scale-95">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>+ Add Child</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Bar -->
+        <div class="md:hidden border-t border-slate-200 bg-slate-50 px-3 py-2 flex justify-around">
+            <button onclick="switchTab('dashboard')" id="mnav-dashboard" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-fuchsia-600 font-bold text-xs">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+                Board
+            </button>
+            <button onclick="switchTab('roster')" id="mnav-roster" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-slate-500 text-xs">
+                <i data-lucide="users" class="w-5 h-5 mb-0.5"></i>
+                Roster
+            </button>
+            <button onclick="switchTab('studios')" id="mnav-studios" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-slate-500 text-xs">
+                <i data-lucide="brush" class="w-5 h-5 mb-0.5"></i>
+                Studios
+            </button>
+            <button onclick="switchTab('history')" id="mnav-history" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-slate-500 text-xs">
+                <i data-lucide="clock" class="w-5 h-5 mb-0.5"></i>
+                Logs
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 custom-scrollbar">
+
+        <!-- Key Metrics Summary Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
+            <!-- Total Enrolled -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Enrolled</p>
+                    <h3 id="stat-total" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Today's Roster</p>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Checked In Now -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex items-center justify-between bg-gradient-to-br from-emerald-50/50 to-white">
+                <div>
+                    <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Present In Studio</p>
+                    <h3 id="stat-present" class="text-2xl sm:text-3xl font-black text-emerald-700 mt-1">0</h3>
+                    <p class="text-xs text-emerald-600/80 mt-0.5" id="stat-present-pct">0% checked in</p>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Expected / Remaining -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-sm flex items-center justify-between bg-gradient-to-br from-amber-50/50 to-white">
+                <div>
+                    <p class="text-xs font-bold text-amber-700 uppercase tracking-wider">Expected Arrival</p>
+                    <h3 id="stat-expected" class="text-2xl sm:text-3xl font-black text-amber-700 mt-1">0</h3>
+                    <p class="text-xs text-amber-600/80 mt-0.5">Not yet arrived</p>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Checked Out -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-indigo-200/80 shadow-sm flex items-center justify-between bg-gradient-to-br from-indigo-50/50 to-white">
+                <div>
+                    <p class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Picked Up</p>
+                    <h3 id="stat-checkedout" class="text-2xl sm:text-3xl font-black text-indigo-700 mt-1">0</h3>
+                    <p class="text-xs text-indigo-600/80 mt-0.5">Checked out safely</p>
+                </div>
+                <div class="w-11 h-11 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                    <i data-lucide="log-out" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 1: LIVE CHECK-IN BOARD ================= -->
+        <section id="view-dashboard" class="tab-view space-y-6">
+            
+            <!-- Filter & Search Control Panel -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+                
+                <!-- Search Input -->
+                <div class="relative w-full md:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="board-search" oninput="renderDashboard()" placeholder="Search kid, parent, or studio..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition">
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="flex items-center space-x-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar">
+                    <button onclick="setFilter('all')" id="filter-all" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-900 text-white">
+                        All (<span id="cnt-all">0</span>)
+                    </button>
+                    <button onclick="setFilter('present')" id="filter-present" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700">
+                        Present (<span id="cnt-present">0</span>)
+                    </button>
+                    <button onclick="setFilter('expected')" id="filter-expected" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700">
+                        Expected (<span id="cnt-expected">0</span>)
+                    </button>
+                    <button onclick="setFilter('checkedout')" id="filter-checkedout" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">
+                        Picked Up (<span id="cnt-checkedout">0</span>)
+                    </button>
+                    <button onclick="setFilter('allergy')" id="filter-allergy" class="filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-rose-50 text-rose-700 border border-rose-200/60 hover:bg-rose-100">
+                        ⚠️ Medical Alerts (<span id="cnt-allergy">0</span>)
+                    </button>
+                </div>
+
+                <!-- Studio Dropdown Filter -->
+                <div class="w-full md:w-auto flex items-center space-x-2">
+                    <span class="text-xs font-bold text-slate-400 whitespace-nowrap">Studio:</span>
+                    <select id="board-studio-filter" onchange="renderDashboard()" class="w-full md:w-auto px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                        <option value="ALL">All Arts Studios</option>
+                        <option value="Ceramics & Clay Studio">Ceramics & Clay Studio</option>
+                        <option value="Watercolor & Painting">Watercolor & Painting</option>
+                        <option value="Digital Illustration">Digital Illustration</option>
+                        <option value="Fiber Arts & Textiles">Fiber Arts & Textiles</option>
+                        <option value="3D Sculpture & Paper">3D Sculpture & Paper</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Cards Grid for Kids Check-In -->
+            <div id="kids-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Empty State Display -->
+            <div id="empty-state" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="search-x" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-700">No students match your filter</h3>
+                <p class="text-xs text-slate-400 mt-1">Try adjusting your search query or station filters.</p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Clear Filters</button>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: ROSTER MANAGEMENT ================= -->
+        <section id="view-roster" class="tab-view space-y-6 hidden">
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Student Directory</h2>
+                        <p class="text-xs text-slate-500">Manage student profiles, emergency contacts, authorized pickups, and allergies.</p>
+                    </div>
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <input type="text" id="roster-search" oninput="renderRoster()" placeholder="Filter roster..." class="w-full sm:w-64 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                        <button onclick="openAddModal()" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow transition whitespace-nowrap">
+                            + New Student
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-bold tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="py-3.5 px-4 sm:px-6">Student Name</th>
+                                <th class="py-3.5 px-4">Grade / Age</th>
+                                <th class="py-3.5 px-4">Assigned Studio</th>
+                                <th class="py-3.5 px-4">Primary Contact</th>
+                                <th class="py-3.5 px-4">Medical / Notes</th>
+                                <th class="py-3.5 px-4">PIN Code</th>
+                                <th class="py-3.5 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roster-table-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                            <!-- Dynamically Rendered -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: ARTS STUDIOS & STATIONS ================= -->
+        <section id="view-studios" class="tab-view space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Afternoon Studio Stations</h2>
+                    <p class="text-xs text-slate-500">Overview of active workshops and real-time student distribution.</p>
+                </div>
+                <div class="bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200 text-xs font-bold px-3 py-1.5 rounded-xl">
+                    Today's Date: <span id="studio-current-date">Today</span>
+                </div>
+            </div>
+
+            <!-- Studio Cards Grid -->
+            <div id="studios-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Dynamically populated JS -->
+            </div>
+        </section>
+
+        <!-- ================= VIEW 4: HISTORY & LOGS ================= -->
+        <section id="view-history" class="tab-view space-y-6 hidden">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Attendance Log & Security Records</h2>
+                    <p class="text-xs text-slate-500">Chronological activity record of check-in arrivals and guardian pickups.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Export CSV Log</span>
+                    </button>
+                    <button onclick="clearHistoryLog()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold px-3 py-2.5 rounded-xl transition">
+                        Clear Log
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div id="history-log-list" class="divide-y divide-slate-100 max-h-[600px] overflow-y-auto custom-scrollbar">
+                    <!-- Dynamic logs -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODALS & OVERLAYS ================= -->
+
+    <!-- 1. CHECK-OUT VERIFICATION MODAL -->
+    <div id="checkout-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl overflow-hidden border border-slate-100 transform transition-all">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white text-center relative">
+                <button onclick="closeCheckoutModal()" class="absolute right-4 top-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                    <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="text-xl font-extrabold">Authorized Pickup Check-Out</h3>
+                <p class="text-xs text-indigo-100 mt-1">Select and verify the guardian picking up <span id="co-child-name" class="font-bold underline">Child</span></p>
+            </div>
+
+            <form id="checkout-form" onsubmit="confirmCheckOut(event)" class="p-6 space-y-4">
+                <input type="hidden" id="co-child-id">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Select Pickup Person</label>
+                    <div id="co-pickup-options" class="space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Other Authorized Person (If applicable)</label>
+                    <input type="text" id="co-custom-guardian" placeholder="e.g. Grandma Sarah Smith" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Verification Initial / Notes</label>
+                    <input type="text" id="co-staff-notes" required placeholder="Staff initials (e.g. MJ)" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2 flex space-x-3">
+                    <button type="button" onclick="closeCheckoutModal()" class="w-1/2 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition">Cancel</button>
+                    <button type="submit" class="w-1/2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-indigo-200 transition">Confirm Pick-Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. ADD / EDIT STUDENT MODAL -->
+    <div id="student-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
+            <div class="bg-fuchsia-600 p-5 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    <h3 id="modal-title" class="text-base font-bold">Add New Student Profile</h3>
+                </div>
+                <button onclick="closeStudentModal()" class="text-white/80 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="student-form" onsubmit="saveStudent(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="edit-student-id">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">First Name *</label>
+                        <input type="text" id="input-fname" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Last Name *</label>
+                        <input type="text" id="input-lname" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Grade / Age *</label>
+                        <input type="text" id="input-grade" placeholder="e.g. 3rd Grade (8 yrs)" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Assigned Studio *</label>
+                        <select id="input-studio" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                            <option value="Ceramics & Clay Studio">Ceramics & Clay Studio</option>
+                            <option value="Watercolor & Painting">Watercolor & Painting</option>
+                            <option value="Digital Illustration">Digital Illustration</option>
+                            <option value="Fiber Arts & Textiles">Fiber Arts & Textiles</option>
+                            <option value="3D Sculpture & Paper">3D Sculpture & Paper</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                    <p class="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-2">Primary Contact</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Parent/Guardian Name *</label>
+                            <input type="text" id="input-parent-name" required placeholder="e.g. Jessica Miller" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Phone Number *</label>
+                            <input type="tel" id="input-parent-phone" required placeholder="(555) 019-2834" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Additional Authorized Pickups (comma separated)</label>
+                    <input type="text" id="input-pickups" placeholder="e.g. David Miller (Dad), Maria Garcia (Nanny)" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-rose-700 mb-1">Allergies / Medical Notes</label>
+                            <input type="text" id="input-allergies" placeholder="e.g. Severe Peanut Allergy, Epipen" class="w-full px-3.5 py-2 bg-rose-50/50 border border-rose-200 text-rose-900 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">4-Digit Parent Kiosk PIN</label>
+                            <input type="text" id="input-pin" maxlength="4" placeholder="1234" required class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Special Arts / Smock Instructions</label>
+                    <input type="text" id="input-notes" placeholder="e.g. Left-handed, needs extra art smock" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-fuchsia-500 focus:outline-none">
+                </div>
+
+                <div class="pt-3 flex space-x-3">
+                    <button type="button" onclick="closeStudentModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-xs font-bold rounded-xl shadow-md transition">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. PARENT EXPRESS KIOSK OVERLAY (FULLSCREEN TOUCH MODE) -->
+    <div id="kiosk-modal" class="fixed inset-0 bg-slate-900 z-50 flex flex-col justify-between hidden p-4 sm:p-8 select-none">
+        
+        <!-- Kiosk Header -->
+        <div class="flex justify-between items-center bg-slate-800/80 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-slate-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-violet-500 flex items-center justify-center text-white shadow-lg">
+                    <i data-lucide="palette" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-white">ArtSparks Express Check-In</h2>
+                    <p class="text-xs text-slate-400">Parent & Guardian Self-Service Portal</p>
+                </div>
+            </div>
+            <button onclick="closeKioskMode()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center space-x-2">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                <span>Exit Kiosk</span>
+            </button>
+        </div>
+
+        <!-- Kiosk Content Area -->
+        <div class="max-w-2xl w-full mx-auto my-auto bg-slate-800/90 rounded-3xl p-6 sm:p-8 border border-slate-700 shadow-2xl text-center space-y-6">
+            
+            <div id="kiosk-step-1" class="space-y-6">
+                <div class="space-y-2">
+                    <span class="inline-block px-3 py-1 bg-fuchsia-500/20 text-fuchsia-300 text-xs font-bold rounded-full">Step 1 of 2</span>
+                    <h3 class="text-2xl font-bold text-white">Find Your Student</h3>
+                    <p class="text-xs text-slate-400">Type child's name or your 4-digit PIN</p>
+                </div>
+
+                <div class="relative">
+                    <input type="text" id="kiosk-search" oninput="filterKioskList()" placeholder="Type child name or PIN..." class="w-full px-5 py-4 bg-slate-900/90 border-2 border-fuchsia-500/50 rounded-2xl text-white text-lg font-medium focus:outline-none focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20 placeholder-slate-500 text-center">
+                </div>
+
+                <!-- Touch Selection List -->
+                <div id="kiosk-results" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar p-1">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Kiosk Step 2 Confirmation -->
+            <div id="kiosk-step-2" class="space-y-6 hidden">
+                <div class="w-20 h-20 rounded-3xl bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center mx-auto border border-fuchsia-500/30">
+                    <i data-lucide="user-check" class="w-10 h-10"></i>
+                </div>
+                <div>
+                    <h3 id="kiosk-confirm-name" class="text-2xl font-black text-white">Child Name</h3>
+                    <p id="kiosk-confirm-studio" class="text-sm font-semibold text-fuchsia-400 mt-1">Studio Station</p>
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-700 text-left space-y-2 text-xs">
+                    <p class="text-slate-400"><strong class="text-slate-200">Parent Contact:</strong> <span id="kiosk-confirm-parent">--</span></p>
+                    <p class="text-slate-400"><strong class="text-slate-200">Medical Notes:</strong> <span id="kiosk-confirm-allergies" class="text-rose-400 font-bold">None</span></p>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="resetKioskStep()" class="w-1/2 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-2xl text-sm transition">Back</button>
+                    <button onclick="kioskCompleteAction()" id="kiosk-action-btn" class="w-1/2 py-4 bg-gradient-to-r from-fuchsia-600 to-violet-600 text-white font-black rounded-2xl text-sm shadow-xl shadow-fuchsia-500/20 transition active:scale-95">Check In Now</button>
+                </div>
+            </div>
+
+            <!-- Kiosk Success Message Screen -->
+            <div id="kiosk-success" class="space-y-4 py-8 hidden">
+                <div class="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 animate-bounce">
+                    <i data-lucide="check" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-3xl font-black text-white">Welcome to ArtSparks!</h3>
+                <p id="kiosk-success-text" class="text-sm text-slate-300">Student checked in successfully.</p>
+                <p class="text-xs text-slate-500 italic">This screen will reset automatically in a few seconds...</p>
+            </div>
+        </div>
+
+        <!-- Kiosk Footer -->
+        <div class="text-center text-xs text-slate-500">
+            ArtSparks Enrichment Program • Touch Friendly Kiosk Terminal
+        </div>
+    </div>
+
+    <!-- Notification Toast Element -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i id="toast-icon" data-lucide="info" class="w-5 h-5 text-fuchsia-400"></i>
+        <span id="toast-msg" class="text-xs font-semibold">Notification message</span>
+    </div>
+
+    <script>
+        // Initial Mock Database for Afternoon Arts Program
+        let students = [
+            {
+                id: 'std-1',
+                fname: 'Maya',
+                lname: 'Lin-Gomez',
+                grade: '3rd Grade',
+                studio: 'Ceramics & Clay Studio',
+                parentName: 'Elena Gomez',
+                parentPhone: '(555) 234-5678',
+                pickups: ['Carlos Gomez (Dad)', 'Abuela Rosa'],
+                allergies: 'Peanut Allergy (Epipen in bag)',
+                notes: 'Loves wheel throwing; bring extra apron',
+                pin: '1042',
+                status: 'expected', // expected, present, checkedout
+                checkInTime: null,
+                checkOutTime: null,
+                pickupBy: null
+            },
+            {
+                id: 'std-2',
+                fname: 'Leo',
+                lname: 'Vanderbilt',
+                grade: '4th Grade',
+                studio: 'Watercolor & Painting',
+                parentName: 'Marcus Vanderbilt',
+                parentPhone: '(555) 876-5432',
+                pickups: ['Sarah Vanderbilt (Mom)'],
+                allergies: 'None',
+                notes: 'Prefers acrylic paints',
+                pin: '4921',
+                status: 'present',
+                checkInTime: '3:15 PM',
+                checkOutTime: null,
+                pickupBy: null
+            },
+            {
+                id: 'std-3',
+                fname: 'Chloe',
+                lname: 'Chen',
+                grade: '2nd Grade',
+                studio: '3D Sculpture & Paper',
+                parentName: 'David Chen',
+                parentPhone: '(555) 345-6789',
+                pickups: ['Wei Chen (Uncle)'],
+                allergies: 'Dairy sensitivity',
+                notes: 'Left-handed scissors required',
+                pin: '8832',
+                status: 'present',
+                checkInTime: '3:05 PM',
+                checkOutTime: null,
+                pickupBy: null
+            },
+            {
+                id: 'std-4',
+                fname: 'Oliver',
+                lname: 'Jackson',
+                grade: '5th Grade',
+                studio: 'Digital Illustration',
+                parentName: 'Tanya Jackson',
+                parentPhone: '(555) 654-3210',
+                pickups: ['Robert Jackson (Dad)'],
+                allergies: 'Asthma (Inhaler)',
+                notes: 'Enrolled in Procreate iPad track',
+                pin: '3310',
+                status: 'checkedout',
+                checkInTime: '2:55 PM',
+                checkOutTime: '4:45 PM',
+                pickupBy: 'Tanya Jackson'
+            },
+            {
+                id: 'std-5',
+                fname: 'Sofia',
+                lname: 'Patel',
+                grade: '1st Grade',
+                studio: 'Fiber Arts & Textiles',
+                parentName: 'Aisha Patel',
+                parentPhone: '(555) 987-1234',
+                pickups: ['Rajesh Patel (Dad)', 'Grandma Meera'],
+                allergies: 'Latex Allergy',
+                notes: 'Enjoys weaving looms',
+                pin: '5541',
+                status: 'expected',
+                checkInTime: null,
+                checkOutTime: null,
+                pickupBy: null
+            },
+            {
+                id: 'std-6',
+                fname: 'Ethan',
+                lname: 'O\'Connor',
+                grade: '4th Grade',
+                studio: 'Ceramics & Clay Studio',
+                parentName: 'Liam O\'Connor',
+                parentPhone: '(555) 432-1098',
+                pickups: ['Siobhan O\'Connor (Mom)'],
+                allergies: 'None',
+                notes: 'Glaze specialist',
+                pin: '2290',
+                status: 'present',
+                checkInTime: '3:20 PM',
+                checkOutTime: null,
+                pickupBy: null
+            }
+        ];
+
+        let historyLog = [
+            { time: '3:20 PM', text: 'Ethan O\'Connor checked in to Ceramics & Clay Studio' },
+            { time: '3:15 PM', text: 'Leo Vanderbilt checked in to Watercolor & Painting' },
+            { time: '3:05 PM', text: 'Chloe Chen checked in to 3D Sculpture & Paper' },
+            { time: '2:55 PM', text: 'Oliver Jackson checked in to Digital Illustration' },
+            { time: '4:45 PM', text: 'Oliver Jackson checked out by Tanya Jackson' }
+        ];
+
+        let currentFilter = 'all';
+        let currentKioskSelectedChild = null;
+
+        // Web Audio API Sound generator
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'checkin') {
+                // Happy ascending chime
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'checkout') {
+                // Gentle warm pop
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(659.25, now); // E5
+                osc.frequency.exponentialRampToValueAtTime(440.00, now + 0.2); // A4
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'alert') {
+                // Soft double warning beep
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        window.onload = function() {
+            lucide.createIcons();
+            document.getElementById('studio-current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            updateStats();
+            renderDashboard();
+            renderRoster();
+            renderStudios();
+            renderHistoryLog();
+        };
+
+        // Navigation Tab Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + tabName).classList.remove('hidden');
+
+            // Style nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900';
+            });
+            const activeNav = document.getElementById('nav-' + tabName);
+            if (activeNav) {
+                activeNav.className = 'nav-btn px-4 py-2 text-sm font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white text-slate-900 shadow-sm';
+            }
+
+            // Mobile nav styling
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.className = 'mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-slate-500 text-xs';
+            });
+            const activeMNav = document.getElementById('mnav-' + tabName);
+            if (activeMNav) {
+                activeMNav.className = 'mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-lg text-fuchsia-600 font-bold text-xs';
+            }
+
+            // Re-render specific tab contents
+            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'roster') renderRoster();
+            if (tabName === 'studios') renderStudios();
+            if (tabName === 'history') renderHistoryLog();
+
+            lucide.createIcons();
+        }
+
+        function updateStats() {
+            const total = students.length;
+            const present = students.filter(s => s.status === 'present').length;
+            const expected = students.filter(s => s.status === 'expected').length;
+            const checkedout = students.filter(s => s.status === 'checkedout').length;
+            const allergyCount = students.filter(s => s.allergies && s.allergies.toLowerCase() !== 'none').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-present').textContent = present;
+            document.getElementById('stat-expected').textContent = expected;
+            document.getElementById('stat-checkedout').textContent = checkedout;
+
+            const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+            document.getElementById('stat-present-pct').textContent = `${pct}% checked in`;
+
+            document.getElementById('cnt-all').textContent = total;
+            document.getElementById('cnt-present').textContent = present;
+            document.getElementById('cnt-expected').textContent = expected;
+            document.getElementById('cnt-checkedout').textContent = checkedout;
+            document.getElementById('cnt-allergy').textContent = allergyCount;
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-pill').forEach(btn => {
+                btn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200';
+            });
+            const activeBtn = document.getElementById('filter-' + filterType);
+            if (activeBtn) {
+                if (filterType === 'present') activeBtn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-sm';
+                else if (filterType === 'expected') activeBtn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-amber-600 text-white shadow-sm';
+                else if (filterType === 'checkedout') activeBtn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-sm';
+                else if (filterType === 'allergy') activeBtn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-rose-600 text-white shadow-sm';
+                else activeBtn.className = 'filter-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-900 text-white';
+            }
+            renderDashboard();
+        }
+
+        function resetFilters() {
+            document.getElementById('board-search').value = '';
+            document.getElementById('board-studio-filter').value = 'ALL';
+            setFilter('all');
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('kids-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchVal = document.getElementById('board-search').value.toLowerCase();
+            const studioVal = document.getElementById('board-studio-filter').value;
+
+            let filtered = students.filter(s => {
+                const matchSearch = s.fname.toLowerCase().includes(searchVal) || 
+                                    s.lname.toLowerCase().includes(searchVal) || 
+                                    s.parentName.toLowerCase().includes(searchVal) ||
+                                    s.studio.toLowerCase().includes(searchVal);
+                
+                const matchStudio = studioVal === 'ALL' || s.studio === studioVal;
+
+                let matchStatus = true;
+                if (currentFilter === 'present') matchStatus = s.status === 'present';
+                else if (currentFilter === 'expected') matchStatus = s.status === 'expected';
+                else if (currentFilter === 'checkedout') matchStatus = s.status === 'checkedout';
+                else if (currentFilter === 'allergy') matchStatus = s.allergies && s.allergies.toLowerCase() !== 'none';
+
+                return matchSearch && matchStudio && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            grid.innerHTML = filtered.map(s => {
+                let statusBadge = '';
+                let cardBorder = 'border-slate-200/80';
+                let actionButton = '';
+
+                if (s.status === 'present') {
+                    statusBadge = `<span class="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border border-emerald-200">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span>IN STUDIO (${s.checkInTime || 'Checked In'})</span>
+                                   </span>`;
+                    cardBorder = 'border-emerald-300 ring-1 ring-emerald-200/50';
+                    actionButton = `<button onclick="openCheckoutModal('${s.id}')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center justify-center space-x-1.5 active:scale-98">
+                                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                                        <span>Pick Up / Check Out</span>
+                                    </button>`;
+                } else if (s.status === 'expected') {
+                    statusBadge = `<span class="inline-flex items-center bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border border-amber-200">
+                                    <span>EXPECTED</span>
+                                   </span>`;
+                    actionButton = `<button onclick="quickCheckIn('${s.id}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center justify-center space-x-1.5 active:scale-98">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                        <span>Check In Child</span>
+                                    </button>`;
+                } else {
+                    statusBadge = `<span class="inline-flex items-center bg-indigo-50 text-indigo-700 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border border-indigo-200">
+                                    <span>CHECKED OUT (${s.checkOutTime})</span>
+                                   </span>`;
+                    actionButton = `<button onclick="quickCheckIn('${s.id}')" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                        <span>Re-Check In</span>
+                                    </button>`;
+                }
+
+                const hasAllergy = s.allergies && s.allergies.toLowerCase() !== 'none';
+                const initials = s.fname[0] + s.lname[0];
+
+                return `
+                    <div class="bg-white rounded-2xl p-5 border ${cardBorder} shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4 relative">
+                        <div>
+                            <!-- Header Row -->
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                                        ${initials}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-extrabold text-slate-900 text-base leading-tight">${s.fname} ${s.lname}</h3>
+                                        <p class="text-xs text-slate-500 font-medium">${s.grade}</p>
+                                    </div>
+                                </div>
+                                ${statusBadge}
+                            </div>
+
+                            <!-- Studio Badge -->
+                            <div class="mt-3.5 inline-flex items-center space-x-1.5 px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">
+                                <i data-lucide="brush" class="w-3.5 h-3.5 text-fuchsia-600"></i>
+                                <span>${s.studio}</span>
+                            </div>
+
+                            <!-- Allergy / Alert Badge -->
+                            ${hasAllergy ? `
+                                <div class="mt-2.5 p-2 bg-rose-50 border border-rose-200/80 rounded-xl flex items-center space-x-2 text-rose-800 text-xs font-semibold">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600 flex-shrink-0"></i>
+                                    <span class="truncate">${s.allergies}</span>
+                                </div>
+                            ` : ''}
+
+                            <!-- Details list -->
+                            <div class="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Primary Contact:</span>
+                                    <span class="font-semibold text-slate-800">${s.parentName}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Phone:</span>
+                                    <a href="tel:${s.parentPhone}" class="text-fuchsia-600 font-medium hover:underline">${s.parentPhone}</a>
+                                </div>
+                                ${s.pickupBy ? `
+                                <div class="flex justify-between text-indigo-700 font-medium">
+                                    <span>Picked up by:</span>
+                                    <span>${s.pickupBy}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Action Footer -->
+                        <div class="pt-2">
+                            ${actionButton}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Quick Check In Action
+        function quickCheckIn(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            student.status = 'present';
+            student.checkInTime = timeStr;
+            student.checkOutTime = null;
+            student.pickupBy = null;
+
+            historyLog.unshift({
+                time: timeStr,
+                text: `${student.fname} ${student.lname} checked in to ${student.studio}`
+            });
+
+            playSound('checkin');
+            showToast(`Checked in ${student.fname} ${student.lname}`, 'check');
+            updateStats();
+            renderDashboard();
+        }
+
+        function openCheckoutModal(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById('co-child-id').value = student.id;
+            document.getElementById('co-child-name').textContent = `${student.fname} ${student.lname}`;
+            document.getElementById('co-custom-guardian').value = '';
+            document.getElementById('co-staff-notes').value = '';
+
+            // Render Pickup Options radio list
+            const optionsContainer = document.getElementById('co-pickup-options');
+            let optionsHTML = `
+                <label class="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                    <input type="radio" name="co-guardian" value="${student.parentName}" checked class="text-violet-600 focus:ring-violet-500">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">${student.parentName}</p>
+                        <p class="text-[10px] text-slate-500">Primary Parent / Guardian</p>
+                    </div>
+                </label>
+            `;
+
+            student.pickups.forEach(p => {
+                if (p.trim()) {
+                    optionsHTML += `
+                        <label class="flex items-center space-x-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition">
+                            <input type="radio" name="co-guardian" value="${p.trim()}" class="text-violet-600 focus:ring-violet-500">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">${p.trim()}</p>
+                                <p class="text-[10px] text-slate-500">Authorized Pickup List</p>
+                            </div>
+                        </label>
+                    `;
+                }
+            });
+
+            optionsContainer.innerHTML = optionsHTML;
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+        }
+
+        function confirmCheckOut(e) {
+            e.preventDefault();
+            const id = document.getElementById('co-child-id').value;
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            const selectedRadio = document.querySelector('input[name="co-guardian"]:checked');
+            const customGuardian = document.getElementById('co-custom-guardian').value.trim();
+            const staffNotes = document.getElementById('co-staff-notes').value.trim();
+
+            const pickupPerson = customGuardian || (selectedRadio ? selectedRadio.value : student.parentName);
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            student.status = 'checkedout';
+            student.checkOutTime = timeStr;
+            student.pickupBy = pickupPerson;
+
+            historyLog.unshift({
+                time: timeStr,
+                text: `${student.fname} ${student.lname} picked up by ${pickupPerson} (Staff Verified: ${staffNotes})`
+            });
+
+            playSound('checkout');
+            showToast(`${student.fname} safely checked out`, 'log-out');
+            closeCheckoutModal();
+            updateStats();
+            renderDashboard();
+        }
+
+        function renderRoster() {
+            const tbody = document.getElementById('roster-table-body');
+            const searchVal = (document.getElementById('roster-search')?.value || '').toLowerCase();
+
+            const filtered = students.filter(s => 
+                s.fname.toLowerCase().includes(searchVal) ||
+                s.lname.toLowerCase().includes(searchVal) ||
+                s.studio.toLowerCase().includes(searchVal) ||
+                s.parentName.toLowerCase().includes(searchVal)
+            );
+
+            tbody.innerHTML = filtered.map(s => `
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3.5 px-4 sm:px-6">
+                        <div class="font-bold text-slate-900">${s.fname} ${s.lname}</div>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">${s.grade}</td>
+                    <td class="py-3.5 px-4 font-semibold text-fuchsia-700">${s.studio}</td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-bold text-slate-800">${s.parentName}</div>
+                        <div class="text-[11px] text-slate-400">${s.parentPhone}</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        ${s.allergies && s.allergies.toLowerCase() !== 'none' ? 
+                            `<span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded text-[11px]">${s.allergies}</span>` : 
+                            `<span class="text-slate-400">None</span>`}
+                    </td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-slate-600">${s.pin}</td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                        <button onclick="editStudent('${s.id}')" class="p-1.5 hover:bg-slate-200 rounded-lg text-slate-600 transition" title="Edit">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteStudent('${s.id}')" class="p-1.5 hover:bg-rose-100 rounded-lg text-rose-600 transition" title="Delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function openAddModal() {
+            document.getElementById('edit-student-id').value = '';
+            document.getElementById('modal-title').textContent = 'Add New Student Profile';
+            document.getElementById('student-form').reset();
+            document.getElementById('input-pin').value = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('student-modal').classList.remove('hidden');
+        }
+
+        function editStudent(id) {
+            const s = students.find(x => x.id === id);
+            if (!s) return;
+
+            document.getElementById('edit-student-id').value = s.id;
+            document.getElementById('modal-title').textContent = 'Edit Student Profile';
+            document.getElementById('input-fname').value = s.fname;
+            document.getElementById('input-lname').value = s.lname;
+            document.getElementById('input-grade').value = s.grade;
+            document.getElementById('input-studio').value = s.studio;
+            document.getElementById('input-parent-name').value = s.parentName;
+            document.getElementById('input-parent-phone').value = s.parentPhone;
+            document.getElementById('input-pickups').value = s.pickups ? s.pickups.join(', ') : '';
+            document.getElementById('input-allergies').value = s.allergies || '';
+            document.getElementById('input-pin').value = s.pin || '1234';
+            document.getElementById('input-notes').value = s.notes || '';
+
+            document.getElementById('student-modal').classList.remove('hidden');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('student-modal').classList.add('hidden');
+        }
+
+        function saveStudent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-student-id').value;
+
+            const fname = document.getElementById('input-fname').value.trim();
+            const lname = document.getElementById('input-lname').value.trim();
+            const grade = document.getElementById('input-grade').value.trim();
+            const studio = document.getElementById('input-studio').value;
+            const parentName = document.getElementById('input-parent-name').value.trim();
+            const parentPhone = document.getElementById('input-parent-phone').value.trim();
+            const pickupsRaw = document.getElementById('input-pickups').value;
+            const allergies = document.getElementById('input-allergies').value.trim();
+            const pin = document.getElementById('input-pin').value.trim();
+            const notes = document.getElementById('input-notes').value.trim();
+
+            const pickupsArr = pickupsRaw.split(',').map(p => p.trim()).filter(p => p.length > 0);
+
+            if (editId) {
+                const s = students.find(x => x.id === editId);
+                if (s) {
+                    s.fname = fname;
+                    s.lname = lname;
+                    s.grade = grade;
+                    s.studio = studio;
+                    s.parentName = parentName;
+                    s.parentPhone = parentPhone;
+                    s.pickups = pickupsArr;
+                    s.allergies = allergies;
+                    s.pin = pin;
+                    s.notes = notes;
+                    showToast('Student details updated', 'check');
+                }
+            } else {
+                const newStudent = {
+                    id: 'std-' + Date.now(),
+                    fname,
+                    lname,
+                    grade,
+                    studio,
+                    parentName,
+                    parentPhone,
+                    pickups: pickupsArr,
+                    allergies,
+                    notes,
+                    pin,
+                    status: 'expected',
+                    checkInTime: null,
+                    checkOutTime: null,
+                    pickupBy: null
+                };
+                students.push(newStudent);
+                showToast('New student registered', 'user-plus');
+            }
+
+            closeStudentModal();
+            updateStats();
+            renderDashboard();
+            renderRoster();
+            renderStudios();
+        }
+
+        function deleteStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            // Custom UI prompt logic without native confirm
+            if (window.confirmDeleteId === id) {
+                students = students.filter(s => s.id !== id);
+                window.confirmDeleteId = null;
+                showToast('Student record removed', 'trash-2');
+                updateStats();
+                renderDashboard();
+                renderRoster();
+            } else {
+                window.confirmDeleteId = id;
+                showToast(`Click delete again to confirm removing ${student.fname}`, 'alert-triangle');
+                setTimeout(() => { window.confirmDeleteId = null; }, 4000);
+            }
+        }
+
+        function renderStudios() {
+            const studioList = [
+                { name: 'Ceramics & Clay Studio', icon: 'shapes', capacity: 10, bg: 'from-amber-500 to-orange-600' },
+                { name: 'Watercolor & Painting', icon: 'palette', capacity: 12, bg: 'from-fuchsia-500 to-pink-600' },
+                { name: 'Digital Illustration', icon: 'laptop', capacity: 8, bg: 'from-blue-500 to-cyan-600' },
+                { name: 'Fiber Arts & Textiles', icon: 'scissors', capacity: 10, bg: 'from-emerald-500 to-teal-600' },
+                { name: '3D Sculpture & Paper', icon: 'box', capacity: 10, bg: 'from-violet-500 to-purple-600' }
+            ];
+
+            const grid = document.getElementById('studios-grid');
+            grid.innerHTML = studioList.map(st => {
+                const assigned = students.filter(s => s.studio === st.name);
+                const presentCount = assigned.filter(s => s.status === 'present').length;
+
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
+                        <div class="p-4 bg-gradient-to-r ${st.bg} text-white flex justify-between items-center">
+                            <div class="flex items-center space-x-2.5">
+                                <i data-lucide="${st.icon}" class="w-5 h-5"></i>
+                                <h3 class="font-extrabold text-sm">${st.name}</h3>
+                            </div>
+                            <span class="text-xs font-bold bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                                ${presentCount} / ${assigned.length} Present
+                            </span>
+                        </div>
+                        <div class="p-4 flex-1 space-y-3">
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Students in this studio:</div>
+                            ${assigned.length === 0 ? '<p class="text-xs text-slate-400 italic">No students assigned</p>' : ''}
+                            <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                ${assigned.map(s => `
+                                    <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                        <span class="font-bold text-slate-800">${s.fname} ${s.lname}</span>
+                                        ${s.status === 'present' ? 
+                                            `<span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Checked In (${s.checkInTime})</span>` : 
+                                            s.status === 'checkedout' ? 
+                                            `<span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">Picked Up</span>` :
+                                            `<span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Expected</span>`
+                                        }
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function openKioskMode() {
+            document.getElementById('kiosk-modal').classList.remove('hidden');
+            resetKioskStep();
+        }
+
+        function closeKioskMode() {
+            document.getElementById('kiosk-modal').classList.add('hidden');
+        }
+
+        function resetKioskStep() {
+            document.getElementById('kiosk-step-1').classList.remove('hidden');
+            document.getElementById('kiosk-step-2').classList.add('hidden');
+            document.getElementById('kiosk-success').classList.add('hidden');
+            document.getElementById('kiosk-search').value = '';
+            filterKioskList();
+        }
+
+        function filterKioskList() {
+            const query = document.getElementById('kiosk-search').value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('kiosk-results');
+
+            if (!query) {
+                resultsContainer.innerHTML = students.slice(0, 6).map(s => kioskCardHTML(s)).join('');
+            } else {
+                const matches = students.filter(s => 
+                    s.fname.toLowerCase().includes(query) ||
+                    s.lname.toLowerCase().includes(query) ||
+                    s.pin === query
+                );
+
+                if (matches.length === 0) {
+                    resultsContainer.innerHTML = `<p class="col-span-2 text-slate-400 text-xs py-4 text-center">No matching student found.</p>`;
+                } else {
+                    resultsContainer.innerHTML = matches.map(s => kioskCardHTML(s)).join('');
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function kioskCardHTML(s) {
+            const isPresent = s.status === 'present';
+            return `
+                <button onclick="selectKioskStudent('${s.id}')" class="p-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600 rounded-2xl text-left transition flex items-center justify-between group active:scale-95">
+                    <div>
+                        <p class="font-bold text-white text-sm">${s.fname} ${s.lname}</p>
+                        <p class="text-[11px] text-fuchsia-300 font-medium">${s.studio}</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${isPresent ? 'bg-indigo-500/20 text-indigo-300' : 'bg-emerald-500/20 text-emerald-300'}">
+                        ${isPresent ? 'Check Out' : 'Check In'}
+                    </span>
+                </button>
+            `;
+        }
+
+        function selectKioskStudent(id) {
+            currentKioskSelectedChild = students.find(s => s.id === id);
+            if (!currentKioskSelectedChild) return;
+
+            document.getElementById('kiosk-step-1').classList.add('hidden');
+            document.getElementById('kiosk-step-2').classList.remove('hidden');
+
+            document.getElementById('kiosk-confirm-name').textContent = `${currentKioskSelectedChild.fname} ${currentKioskSelectedChild.lname}`;
+            document.getElementById('kiosk-confirm-studio').textContent = `Assigned: ${currentKioskSelectedChild.studio}`;
+            document.getElementById('kiosk-confirm-parent').textContent = `${currentKioskSelectedChild.parentName} (${currentKioskSelectedChild.parentPhone})`;
+            document.getElementById('kiosk-confirm-allergies').textContent = currentKioskSelectedChild.allergies || 'None recorded';
+
+            const btn = document.getElementById('kiosk-action-btn');
+            if (currentKioskSelectedChild.status === 'present') {
+                btn.textContent = 'Confirm Check Out / Pickup';
+                btn.className = 'w-1/2 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black rounded-2xl text-sm shadow-xl transition active:scale-95';
+            } else {
+                btn.textContent = 'Confirm Check In';
+                btn.className = 'w-1/2 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black rounded-2xl text-sm shadow-xl transition active:scale-95';
+            }
+        }
+
+        function kioskCompleteAction() {
+            if (!currentKioskSelectedChild) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (currentKioskSelectedChild.status === 'present') {
+                currentKioskSelectedChild.status = 'checkedout';
+                currentKioskSelectedChild.checkOutTime = timeStr;
+                currentKioskSelectedChild.pickupBy = currentKioskSelectedChild.parentName;
+                historyLog.unshift({ time: timeStr, text: `[Kiosk] ${currentKioskSelectedChild.fname} ${currentKioskSelectedChild.lname} checked out by parent` });
+                playSound('checkout');
+                document.getElementById('kiosk-success-text').textContent = `${currentKioskSelectedChild.fname} has been safely checked out!`;
+            } else {
+                currentKioskSelectedChild.status = 'present';
+                currentKioskSelectedChild.checkInTime = timeStr;
+                currentKioskSelectedChild.checkOutTime = null;
+                historyLog.unshift({ time: timeStr, text: `[Kiosk] ${currentKioskSelectedChild.fname} ${currentKioskSelectedChild.lname} checked in via self kiosk` });
+                playSound('checkin');
+                document.getElementById('kiosk-success-text').textContent = `Welcome ${currentKioskSelectedChild.fname}! Head on over to ${currentKioskSelectedChild.studio}.`;
+            }
+
+            document.getElementById('kiosk-step-2').classList.add('hidden');
+            document.getElementById('kiosk-success').classList.remove('hidden');
+
+            updateStats();
+            renderDashboard();
+
+            setTimeout(() => {
+                resetKioskStep();
+            }, 3000);
+        }
+
+        function renderHistoryLog() {
+            const list = document.getElementById('history-log-list');
+            if (historyLog.length === 0) {
+                list.innerHTML = `<p class="p-6 text-center text-xs text-slate-400">No attendance activity logged yet today.</p>`;
+                return;
+            }
+
+            list.innerHTML = historyLog.map(item => `
+                <div class="p-4 flex items-center space-x-3 text-xs">
+                    <span class="font-mono font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md whitespace-nowrap">${item.time}</span>
+                    <span class="font-medium text-slate-700">${item.text}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistoryLog() {
+            historyLog = [];
+            renderHistoryLog();
+            showToast('Log cleared', 'trash-2');
+        }
+
+        // CSV Report Export Generator
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Student Name,Grade,Studio Station,Status,Check In Time,Check Out Time,Primary Parent,Phone,Picked Up By\n";
+
+            students.forEach(s => {
+                const row = [
+                    `"${s.fname} ${s.lname}"`,
+                    `"${s.grade}"`,
+                    `"${s.studio}"`,
+                    `"${s.status.toUpperCase()}"`,
+                    `"${s.checkInTime || ''}"`,
+                    `"${s.checkOutTime || ''}"`,
+                    `"${s.parentName}"`,
+                    `"${s.parentPhone}"`,
+                    `"${s.pickupBy || ''}"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `ArtSparks_Attendance_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('CSV Report Downloaded', 'download');
+        }
+
+        function showToast(message, iconName = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = message;
+            toastIcon.setAttribute('data-lucide', iconName);
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
